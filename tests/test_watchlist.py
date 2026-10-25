@@ -91,3 +91,22 @@ def test_get_watchlist_returns_newest_first(app, sample_user):
         # order would put Alien first, so this also fails if the sort regresses.
         assert titles[0] == "Blade Runner"
         assert titles[1] == "Alien"
+
+
+# ── Default visibility ───────────────────────────────────────────────────────
+
+def test_add_to_watchlist_defaults_to_private(app, sample_user, sample_film):
+    """
+    A new watchlist entry should be private (public=False) unless the user
+    explicitly chooses to share it.
+    """
+    with app.app_context():
+        entry = add_to_watchlist(user_id=sample_user, film_id=sample_film)
+
+        assert entry.public is False
+
+        # Verify the default persisted, not just the in-memory object
+        in_db = WatchlistEntry.query.filter_by(
+            user_id=sample_user, film_id=sample_film
+        ).first()
+        assert in_db.public is False
