@@ -1,6 +1,7 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
+
 I used Claude Code (an AI coding assistant) throughout this project:
 
 - **Codebase orientation.** I asked it to summarize `models.py`: what it is responsible for, its main classes and what depends on it. I used the summary to find the other files that use the models.
@@ -51,6 +52,7 @@ I used Claude Code (an AI coding assistant) throughout this project:
 ## PR Description
 
 ### What the feature does
+
 Adds a watchlist so a user can save films they want to watch later, separate from the collection of films they have already watched.
 
 - `WatchlistEntry` model: a user, a film (UUID), a `date_added` timestamp and a `public` flag.
@@ -59,17 +61,20 @@ Adds a watchlist so a user can save films they want to watch later, separate fro
 - `GET /watchlist/<user_id>` returns the user's watchlist, newest first.
 
 ### Changes made in response to review
+
 - Renamed `save_to_watchlist()` to `add_to_watchlist()` to match `add_to_collection()`.
 - Added a duplicate check, following `add_to_collection()`: the same user and film raises an error and returns 409.
 - Added tests for a nonexistent film, the sort order and the default visibility.
 - Rebased onto main and updated the watchlist code for UUID film IDs.
 
 ### Design decisions
+
 **1. Default visibility: `public=False` (private by default).** A watchlist can reveal someone's tastes before they've chosen to share anything, and most users never change a default, so whichever value I pick becomes the real behavior. A hidden list is easy to fix later by opting in, but an exposed list can't be taken back. The cost is that most watchlists will start out invisible, which gives future friend and community features less to work with. I accept that because those features don't exist yet. Nothing enforces `public` yet: the flag is stored and returned but not checked, so enforcing visibility would be a separate change. I suggest the same private-by-default rule for any future user lists.
 
 **2. Sort order: date added, newest first.** I adopted the reviewer's preference. A watchlist is a queue, and the entries people most want to act on are the ones they added recently. It also matches `get_collection()`. The limit is that someone checking whether a specific film is already on a long list can scan alphabetical order faster, so an optional `?sort=title` could serve that later. I did not add it here, to keep the change small.
 
 ### How to test manually
+
 1. Install and seed: `pip install -r requirements.txt`, then `python seed.py`. Note the `user_id` it prints.
 2. Start the app: `python app.py` (it runs on `http://localhost:5000`).
 3. Get a film ID: `GET http://localhost:5000/films/` and copy the `id` of any film (a UUID).
@@ -82,4 +87,4 @@ Adds a watchlist so a user can save films they want to watch later, separate fro
 
 ## Commit History
 
-<!-- Paste your `git log --oneline` screenshot here, e.g. ![git log --oneline](images/git-log.png) -->
+![git log --oneline](images/git-log.png)
